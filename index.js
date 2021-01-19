@@ -20,7 +20,8 @@ async function printDiagram(page, options) {
     minDimensions,
     footer,
     title = true,
-    deviceScaleFactor
+    deviceScaleFactor,
+    element
   } = options;
 
   const diagramXML = readFileSync(input, 'utf8');
@@ -33,7 +34,7 @@ async function printDiagram(page, options) {
 
   const viewerScript = relative(__dirname, require.resolve('bpmn-js/dist/bpmn-viewer.production.min.js'));
 
-  const desiredViewport = await page.evaluate(async function(diagramXML, options) {
+  const result = await page.evaluate(async function(diagramXML, options) {
 
     const {
       viewerScript,
@@ -49,7 +50,12 @@ async function printDiagram(page, options) {
     title: diagramTitle,
     viewerScript,
     footer
-  });;
+  });
+
+  console.log("--- result ---");
+  console.log(result);
+
+  const desiredViewport = result.desiredViewport;
 
   page.setViewport({
     width: Math.round(desiredViewport.width),
@@ -60,6 +66,17 @@ async function printDiagram(page, options) {
   await page.evaluate(() => {
     return resize();
   });
+
+  const bpmnViewer = result.bpmnViewer;
+
+  if (typeof element === 'string') {
+    console.log("=== zoom the element ===");
+    console.log(element);
+    await page.evaluate((element) => {
+      zoomToElement(element);
+    }, element);
+    console.log("==== zoom done ===");  
+  }
 
   for (const output of outputs) {
 
@@ -97,7 +114,6 @@ async function printDiagram(page, options) {
 
 }
 
-
 async function withPage(fn) {
   let browser;
 
@@ -105,14 +121,16 @@ async function withPage(fn) {
     browser = await puppeteer.launch({
       args: [
         '--no-sandbox',
-        '--disable-setuid-sandbox'
-      ]
+        '--disable-setuid-sandbox',
+      ],
+      devtools: false,
+      headless: false
     });
 
     await fn(await browser.newPage());
   } finally {
     if (browser) {
-      await browser.close();
+      //await browser.close();
     }
   }
 }
@@ -124,7 +142,8 @@ async function convertAll(conversions, options={}) {
     minDimensions,
     footer,
     title,
-    deviceScaleFactor
+    deviceScaleFactor,
+    element
   } = options;
 
   await withPage(async function(page) {
@@ -142,7 +161,8 @@ async function convertAll(conversions, options={}) {
         minDimensions,
         title,
         footer,
-        deviceScaleFactor
+        deviceScaleFactor,
+        element
       });
     }
 

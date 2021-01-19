@@ -34,6 +34,8 @@ const cli = meow(`
 
     --scale                        Scale factor for images (1)
 
+    --element=<element>            The element to zoom to
+
   Examples
 
     # export to diagram.png
@@ -58,6 +60,9 @@ const cli = meow(`
     },
     scale: {
       default: 1
+    },
+    element: {
+      type: 'string'
     }
   }
 });
@@ -104,6 +109,8 @@ const title = cli.flags.title === false ? false : cli.flags.title;
 
 const scale = cli.flags.scale !== undefined ? cli.flags.scale : 1;
 
+const element = cli.flags.element;
+
 const [ width, height ] = cli.flags.minDimensions.split('x').map(function(d) {
   return parseInt(d, 10);
 });
@@ -111,7 +118,8 @@ convertAll(conversions, {
   minDimensions: { width, height },
   title,
   footer,
-  deviceScaleFactor: scale
+  deviceScaleFactor: scale,
+  element
 }).catch(function(e) {
   console.error('failed to export diagram(s)');
   console.error(e);
