@@ -67,8 +67,6 @@ async function printDiagram(page, options) {
     return resize();
   });
 
-  const bpmnViewer = result.bpmnViewer;
-
   if (typeof element === 'string') {
     console.log("=== zoom the element ===");
     console.log(element);

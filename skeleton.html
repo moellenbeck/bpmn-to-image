@@ -202,72 +202,78 @@
         return promise;
       }
 
+      function zoomToElement2(element) {
+        bpmnModeler = window.bpmnViewer;
+        const canvas = bpmnModeler.get('canvas');
+        const elementRegistry = bpmnModeler.get('elementRegistry');
+        const task = elementRegistry.get(element);
+        bpmnModeler.get('selection').select(task);
+        canvas.zoom(1.6, task);
+      }
 
       function zoomToElement(elementId) {
-  bpmnModeler = window.bpmnViewer;
-  const canvas = bpmnModeler.get('canvas');
-  const elementRegistry = bpmnModeler.get('elementRegistry');
-  const viewbox = canvas.viewbox(false);
-  const element = elementRegistry.get(elementId);
+        bpmnModeler = window.bpmnViewer;
+        const canvas = bpmnModeler.get('canvas');
+        const elementRegistry = bpmnModeler.get('elementRegistry');
+        const viewbox = canvas.viewbox(false);
+        const element = elementRegistry.get(elementId);
 
-  const isDefinitionOrOtherInvisibleBpmnElement = element == null;
-  if (isDefinitionOrOtherInvisibleBpmnElement) {
-    return this.zoomToViewport();
-  }
-  const rect = getBounds(element);
-  const newViewbox = {
-    x: rect.x + rect.width / 2 - viewbox.outer.width / 2,
-    y: rect.y + rect.height / 2 - viewbox.outer.height / 2,
-    width: viewbox.outer.width,
-    height: viewbox.outer.height,
-  };
+        const isDefinitionOrOtherInvisibleBpmnElement = element == null;
+        if (isDefinitionOrOtherInvisibleBpmnElement) {
+          return this.zoomToViewport();
+        }
+        const rect = getBounds(element);
+        const newViewbox = {
+          x: rect.x + rect.width / 2 - viewbox.outer.width / 2,
+          y: rect.y + rect.height / 2 - viewbox.outer.height / 2,
+          width: viewbox.outer.width,
+          height: viewbox.outer.height,
+        };
 
-  canvas.viewbox(newViewbox);
-  //canvas.zoom(1);
-  canvas.zoom(1.7, element);
-}
+        canvas.viewbox(newViewbox);
+        //canvas.zoom(1);
+        canvas.zoom(1.7, element);
+      }
 
-function getBounds(element, abort = false){
-  const elements = [element];
-  let minX = null;
-  let minY = null;
-  let maxX = null;
-  let maxY = null;
-  abort = !!abort;
-  elements.forEach((element) => {
-    let bbox = element;
-    if (element.waypoints && !abort) {
-      bbox = getBounds(element.waypoints[0], true);
-    }
-    let x = bbox.x,
-      y = bbox.y,
-      height = bbox.height || 0,
-      width = bbox.width || 0;
-    if (minX == null || x < minX) {
-      minX = x;
-    }
-    if (minY == null || y < minY) {
-      minY = y;
-    }
-    if (maxX == null || x + width > maxX) {
-      maxX = x + width;
-    }
-    if (maxY == null || y + height > maxY) {
-      maxY = y + height;
-    }
-  });
-  if (minX == null || maxX == null || minY == null || maxY == null) {
-    throw new Error('Could not get bounds');
-  }
-  return {
-    x: minX,
-    y: minY,
-    height: maxY - minY,
-    width: maxX - minX,
-  };
-}
-
-
+      function getBounds(element, abort = false){
+        const elements = [element];
+        let minX = null;
+        let minY = null;
+        let maxX = null;
+        let maxY = null;
+        abort = !!abort;
+        elements.forEach((element) => {
+          let bbox = element;
+          if (element.waypoints && !abort) {
+            bbox = getBounds(element.waypoints[0], true);
+          }
+          let x = bbox.x,
+            y = bbox.y,
+            height = bbox.height || 0,
+            width = bbox.width || 0;
+          if (minX == null || x < minX) {
+            minX = x;
+          }
+          if (minY == null || y < minY) {
+            minY = y;
+          }
+          if (maxX == null || x + width > maxX) {
+            maxX = x + width;
+          }
+          if (maxY == null || y + height > maxY) {
+            maxY = y + height;
+          }
+        });
+        if (minX == null || maxX == null || minY == null || maxY == null) {
+          throw new Error('Could not get bounds');
+        }
+        return {
+          x: minX,
+          y: minY,
+          height: maxY - minY,
+          width: maxX - minX,
+        };
+      }
     </script>
   </body>
 </html>
